@@ -75,12 +75,12 @@ bridges:
       sendUsernames: true
       relayJoinMessages: false
       relayLeaveMessages: false
-      crossDeleteOnDiscord: false
+      crossDeleteOnDiscord: true
 
     discord:
       channelId: '1567394966836351047'
       sendUsernames: true
       relayJoinMessages: false
       relayLeaveMessages: false
-      crossDeleteOnTelegram: false
+      crossDeleteOnTelegram: true
       useEmbeds: auto
