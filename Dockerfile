@@ -23,10 +23,10 @@ WORKDIR /opt/TediCross
 COPY --from=build --chown=node:node /opt/TediCross/package.json ./
 COPY --from=build --chown=node:node /opt/TediCross/node_modules ./node_modules
 COPY --from=build --chown=node:node /opt/TediCross/dist ./dist
+COPY --chown=node:node settings.yaml ./settings.yaml
 RUN mkdir -p /opt/TediCross/data && chown node:node /opt/TediCross/data
 
-VOLUME /opt/TediCross/data/
 USER node
 
 ENTRYPOINT ["node", "dist/main.js"]
-CMD ["-c", "data/settings.yaml"]
+CMD ["-c", "settings.yaml"]
