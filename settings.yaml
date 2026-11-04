@@ -33,10 +33,39 @@ bridges:
   - name: NEBPAH-Bridge-Lab
     direction: both
 
+    
     topicBridges:
       - name: Bridge-Lab
         telegram: 130698
         discord: '1567394966836351047'
+
+      - name: Pet-Chat
+        telegram: 1
+        discord: '1282130310854869080'
+
+      - name: Topic-11
+        telegram: 11
+        discord: '1365826777544527983'
+
+      - name: Topic-5
+        telegram: 5
+        discord: '1282130310854869078'
+
+      - name: Topic-2
+        telegram: 2
+        discord: '1282130310854869076'
+
+      - name: Topic-104914
+        telegram: 104914
+        discord: '1567430566175965236'
+
+      - name: Topic-11503
+        telegram: 11503
+        discord: '1282265929698246697'
+
+      - name: Topic-45
+        telegram: 45
+        discord: '1365730738472878140'
 
     topicBridgesAutoCreate: false
     topicOnly: true
