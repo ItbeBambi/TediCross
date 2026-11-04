@@ -1,10 +1,33 @@
 telegram:
   token: env
+  useFirstNameInsteadOfUsername: false
+  colonAfterSenderName: false
   skipOldMessages: true
+  sendEmojiWithStickers: true
+  useCustomEmojiFilter: false
+  replaceAtWithHash: false
+  replaceExcessiveSpaces: false
+  removeNewlineSpaces: false
+  suppressFileTooBigMessages: false
+  suppressThisIsPrivateBotMessage: true
+  enableBridgeManagement: false
+  emojiMap: {}
 
 discord:
   token: env
+  useNickname: false
   skipOldMessages: true
+  replyLength: 100
+  maxReplyLines: 2
+  suppressThisIsPrivateBotMessage: true
+  enableCustomStatus: false
+  customStatusMessage: "TediCross"
+  useEmbeds: "auto"
+
+messageTimeoutAmount: 24
+messageTimeoutUnit: hours
+persistentMessageMap: false
+debug: false
 
 bridges:
   - name: NEBPAH-Bridge-Lab
@@ -23,10 +46,12 @@ bridges:
       sendUsernames: true
       relayJoinMessages: false
       relayLeaveMessages: false
+      crossDeleteOnDiscord: false
 
     discord:
       channelId: '1567394966836351047'
       sendUsernames: true
       relayJoinMessages: false
       relayLeaveMessages: false
+      crossDeleteOnTelegram: false
       useEmbeds: auto
