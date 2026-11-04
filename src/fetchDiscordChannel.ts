@@ -1,27 +1,51 @@
+
 import { Client, TextChannel } from "discord.js";
 
 /**
- * Gets a Discord channel, and logs an error if it doesn't exist
- *
- * @returns	A Promise resolving to the channel, or rejecting if it could not be fetched for some reason
+ * Fetches the Discord channel mapped to a Telegram topic.
+ * Prevents topic-only bridges from falling back to the default channel.
  */
-// export const fetchDiscordChannel = R.curry((dcBot: Client, bridge) => {
-export const fetchDiscordChannel = (dcBot: Client, bridge: any, threadID?: number) => {
-	// Get the channel's ID
-	let channelId = bridge.discord.channelId;
+export const fetchDiscordChannel = (
+    dcBot: Client,
+    bridge: any,
+    threadID?: number
+) => {
+    let channelId = bridge.discord.channelId;
 
-	if (bridge.topicBridges && threadID) {
-		for (const topicBridge of bridge.topicBridges) {
-			if (topicBridge.telegram === threadID) {
-				channelId = topicBridge.discord;
-				break;
-			}
-		}
-	}
+    if (bridge.topicOnly) {
+        if (threadID === undefined || threadID === null) {
+            return Promise.reject(
+                new Error(`Missing Telegram topic ID for bridge ${bridge.name}`)
+            ) as Promise<TextChannel>;
+        }
 
-	// Try to get the channel
-	return dcBot.channels.fetch(channelId).catch((err: Error) => {
-		console.error(`Could not find Discord channel ${channelId} in bridge ${bridge.name}: ${err.message}`);
-		throw err;
-	}) as unknown as Promise<TextChannel>;
+        const mapping = bridge.topicBridges?.find(
+            (topic: any) => Number(topic.telegram) === Number(threadID)
+        );
+
+        if (!mapping) {
+            return Promise.reject(
+                new Error(
+                    `No Discord channel mapping for Telegram topic ${threadID} in bridge ${bridge.name}`
+                )
+            ) as Promise<TextChannel>;
+        }
+
+        channelId = mapping.discord;
+    } else if (threadID !== undefined && threadID !== null) {
+        const mapping = bridge.topicBridges?.find(
+            (topic: any) => Number(topic.telegram) === Number(threadID)
+        );
+
+        if (mapping) {
+            channelId = mapping.discord;
+        }
+    }
+
+    return dcBot.channels.fetch(channelId).catch((err: Error) => {
+        console.error(
+            `Could not find Discord channel ${channelId} in bridge ${bridge.name}: ${err.message}`
+        );
+        throw err;
+    }) as Promise<TextChannel>;
 };
