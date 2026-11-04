@@ -35,10 +35,7 @@ bridges:
 
     
     topicBridges:
-      - name: Bridge-Lab
-        telegram: 130698
-        discord: '1567394966836351047'
-
+      
       - name: Pet-Chat
         telegram: 1
         discord: '1282130310854869080'
