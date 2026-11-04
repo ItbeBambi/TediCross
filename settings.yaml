@@ -66,6 +66,14 @@ bridges:
       - name: Topic-45
         telegram: 45
         discord: '1365730738472878140'
+        
+      - name: Vent-R
+        telegram: 52682
+        discord: '1365828130266153032'
+
+      - name: Vent-NR
+        telegram: 52681
+        discord: '1365828155260276868'
 
     topicBridgesAutoCreate: false
     topicOnly: true
