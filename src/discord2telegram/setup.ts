@@ -139,7 +139,7 @@ async function notifyMemberBridge(
 		await tgBot.telegram.sendMessage(
 			bridge.telegram.chatId,
 			`<b>${displayName} (@${username})</b> ${verb} the Discord side of the chat`,
-			{ parse_mode: "HTML", message_thread_id: bridge.tgThread }
+			{ parse_mode: "HTML", ...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread }) }
 		);
 	} catch (err) {
 		logger.error(
@@ -429,7 +429,7 @@ export function setup(
 						const textMessage = await tgBot.telegram.sendMessage(bridge.telegram.chatId, messageCaption, {
 							...telegramReplyOptions(replyId),
 							parse_mode: "HTML",
-							message_thread_id: bridge.tgThread
+							...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 						});
 						sentTelegramMessageIds.push(textMessage.message_id.toString());
 						captionSentAsText = true;
@@ -508,7 +508,7 @@ export function setup(
 								}
 								const sent = await tgBot.telegram.sendMediaGroup(bridge.telegram.chatId, mediaBatch, {
 									...telegramReplyOptions(replyId),
-									message_thread_id: bridge.tgThread
+									...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 								});
 								sentTelegramMessageIds.push(...sent.map(item => item.message_id.toString()));
 								if (attachCaption) captionSentWithMedia = true;
@@ -525,7 +525,7 @@ export function setup(
 											{
 												...telegramReplyOptions(replyId),
 												...captionOptions,
-												message_thread_id: bridge.tgThread
+												...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 											}
 										);
 										break;
@@ -536,7 +536,7 @@ export function setup(
 											{
 												...telegramReplyOptions(replyId),
 												...captionOptions,
-												message_thread_id: bridge.tgThread
+												...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 											}
 										);
 										break;
@@ -547,7 +547,7 @@ export function setup(
 											{
 												...telegramReplyOptions(replyId),
 												...captionOptions,
-												message_thread_id: bridge.tgThread
+												...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 											}
 										);
 										break;
@@ -558,7 +558,7 @@ export function setup(
 											{
 												...telegramReplyOptions(replyId),
 												...captionOptions,
-												message_thread_id: bridge.tgThread
+												...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 											}
 										);
 										break;
@@ -579,7 +579,7 @@ export function setup(
 												...(attachCaption
 													? { caption: messageCaption, parse_mode: "HTML" as const }
 													: {}),
-												message_thread_id: bridge.tgThread
+												...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 											}
 										);
 										sentTelegramMessageIds.push(sent.message_id.toString());
@@ -611,7 +611,7 @@ export function setup(
 											...(itemCaption
 												? { caption: messageCaption, parse_mode: "HTML" as const }
 												: {}),
-											message_thread_id: bridge.tgThread
+											...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 										};
 										try {
 											let sent: any;
@@ -680,7 +680,7 @@ export function setup(
 									...(captionWithVoice
 										? { caption: messageCaption, parse_mode: "HTML" as const }
 										: {}),
-									message_thread_id: bridge.tgThread
+									...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 								}
 							);
 							sentTelegramMessageIds.push(sent.message_id.toString());
@@ -708,7 +708,7 @@ export function setup(
 							}
 							const sent = await tgBot.telegram.sendMediaGroup(bridge.telegram.chatId, media, {
 								...telegramReplyOptions(replyId),
-								message_thread_id: bridge.tgThread
+								...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 							});
 							sentTelegramMessageIds.push(...sent.map(item => item.message_id.toString()));
 							if (captionWithGallery && i === 0) captionSentWithMedia = true;
@@ -721,7 +721,7 @@ export function setup(
 									...(captionWithGallery && i === 0
 										? { caption: messageCaption, parse_mode: "HTML" as const }
 										: {}),
-									message_thread_id: bridge.tgThread
+									...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 								}
 							);
 							sentTelegramMessageIds.push(sent.message_id.toString());
@@ -741,7 +741,7 @@ export function setup(
 											...(attachCaption
 												? { caption: messageCaption, parse_mode: "HTML" as const }
 												: {}),
-											message_thread_id: bridge.tgThread
+											...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 										}
 									);
 									sentTelegramMessageIds.push(sent.message_id.toString());
@@ -772,7 +772,7 @@ export function setup(
 										...(itemCaption
 											? { caption: messageCaption, parse_mode: "HTML" as const }
 											: {}),
-										message_thread_id: bridge.tgThread
+										...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 									};
 									try {
 										let sent: any;
@@ -828,7 +828,7 @@ export function setup(
 							...telegramReplyOptions(replyId),
 							parse_mode: "HTML",
 							link_preview_options: { is_disabled: bridge.discord.disableWebPreviewOnTelegram },
-							message_thread_id: bridge.tgThread
+							...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 						});
 						sentTelegramMessageIds.push(textMessage.message_id.toString());
 					} catch (err) {
@@ -856,7 +856,7 @@ export function setup(
 					try {
 						const noticeMessage = await tgBot.telegram.sendMessage(bridge.telegram.chatId, notice, {
 							...telegramReplyOptions(replyId),
-							message_thread_id: bridge.tgThread
+							...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 						});
 						sentTelegramMessageIds.push(noticeMessage.message_id.toString());
 					} catch (err) {
@@ -979,7 +979,7 @@ export function setup(
 								"⚠️ This message was deleted on Discord.",
 								{
 									...telegramReplyOptions(tgMessageId),
-									message_thread_id: bridge.tgThread
+									...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
 								}
 							)
 						)
