@@ -368,12 +368,19 @@ export function setup(
 								.join("\n")
 					);
 				}
+				// Static Discord stickers are PNG images. Relay them using the existing
+				// Telegram photo pipeline; keep a text fallback for animated formats.
+				const staticStickerUrls: string[] = [];
 				for (const sticker of message.stickers.values()) {
-					const emoji = sticker.tags ? ` ${escapeHTMLSpecialChars(sticker.tags)}` : "";
-					messageParts.push(`[Sticker: ${escapeHTMLSpecialChars(sticker.name)}${emoji}]`);
+					if (sticker.format === 1 && sticker.url) {
+						staticStickerUrls.push(sticker.url);
+					} else {
+						const emoji = sticker.tags ? ` ${escapeHTMLSpecialChars(sticker.tags)}` : "";
+						messageParts.push(`[Sticker: ${escapeHTMLSpecialChars(sticker.name)}${emoji}]`);
+					}
 				}
 
-				const galleryImageUrls = [...componentContent.imageUrls];
+				const galleryImageUrls = [...componentContent.imageUrls, ...staticStickerUrls];
 				for (const embed of message.embeds) {
 					const imageUrl = embed.image?.url ?? embed.thumbnail?.url;
 					if (!imageUrl || galleryImageUrls.includes(imageUrl)) continue;
