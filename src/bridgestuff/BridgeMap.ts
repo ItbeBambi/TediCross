@@ -26,7 +26,7 @@ export class BridgeMap {
 		bridges.forEach(bridge => {
 			const d = this._discordToBridge.get(bridge.discord.channelId) || [];
 			const t = this._telegramToBridge.get(bridge.telegram.chatId) || [];
-			this._discordToBridge.set(bridge.discord.channelId, [...d, bridge]);
+			if (!bridge.topicOnly) this._discordToBridge.set(bridge.discord.channelId, [...d, bridge]);
 			if (bridge.topicBridges) {
 				for (const trMap of bridge.topicBridges) {
 					const upBridge = {

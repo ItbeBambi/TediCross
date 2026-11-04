@@ -11,6 +11,7 @@ export interface BridgeProperties {
 	threadMap?: TopicBridge[];
 	topicBridges?: TopicBridge[];
 	topicBridgesAutoCreate?: boolean;
+	topicOnly?: boolean;
 	tgThread: number | undefined;
 }
 
@@ -32,6 +33,7 @@ export class Bridge {
 	public discord: BridgeSettingsDiscord;
 	public topicBridges: TopicBridge[];
 	public topicBridgesAutoCreate: boolean;
+	public topicOnly: boolean;
 	public tgThread: number | undefined;
 	/**
 	 * Creates a new bridge
@@ -62,6 +64,7 @@ export class Bridge {
 		/** Settings for the Threads mapping */
 		this.topicBridges = settings.topicBridges ?? settings.threadMap ?? [];
 		this.topicBridgesAutoCreate = settings.topicBridgesAutoCreate ?? false;
+		this.topicOnly = settings.topicOnly ?? false;
 	}
 
 	/**

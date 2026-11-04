@@ -16,6 +16,7 @@ bridges:
         discord: '1567394966836351047'
 
     topicBridgesAutoCreate: false
+    topicOnly: true
 
     telegram:
       chatId: -1002634606116

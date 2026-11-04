@@ -73,6 +73,8 @@ bridges:
     #     discord: '123456789012345678'
     # Automatically create Discord threads for Telegram topics without a mapping.
     topicBridgesAutoCreate: false
+    # When true, block Telegram general chat and unmapped topics, and route Discord only through topicBridges.
+    topicOnly: false
 
     telegram:
       chatId: -1001234567890 # Telegram group/channel IDs are negative.

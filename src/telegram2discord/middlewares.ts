@@ -1,5 +1,6 @@
 import R from "ramda";
 import { Bridge } from "../bridgestuff/Bridge";
+import { bridgesForTelegramTopic } from "../bridgestuff/TopicRouting";
 import { BridgeMediaType } from "../bridgestuff/BridgeSettingsTelegram";
 import mime from "mime/lite";
 import { handleEntities } from "./handleEntities";
@@ -237,13 +238,11 @@ function addMessageId(ctx: TediCrossContext, next: () => void) {
 async function addBridgesToContext(ctx: TediCrossContext, next: () => void) {
 	const message = ctx.tediCross.message;
 	const threadId = message.message_thread_id;
+	const configuredBridges = ctx.TediCross.bridgeMap.fromTelegramChatId(message.chat.id);
+	const routedBridges = bridgesForTelegramTopic(configuredBridges, threadId);
 	ctx.tediCross.bridges = await Promise.all(
-		ctx.TediCross.bridgeMap.fromTelegramChatId(message.chat.id).map(async (bridge: Bridge) => {
-			if (!threadId) return [bridge];
-			const mapping = bridge.topicBridges?.find((item: any) => item.telegram === threadId);
-			if (mapping) return [{ ...bridge, tgThread: mapping.telegram }];
-			if (!bridge.topicBridges?.length && !bridge.topicBridgesAutoCreate) return [bridge];
-			if (!bridge.topicBridgesAutoCreate) return [];
+		routedBridges.map(async (bridge: Bridge) => {
+			if (!threadId || bridge.tgThread === threadId || !bridge.topicBridgesAutoCreate) return [bridge];
 			try {
 				const channel = await fetchDiscordChannel(ctx.TediCross.dcBot, bridge);
 				if (!(channel as any).threads?.create) return [];
