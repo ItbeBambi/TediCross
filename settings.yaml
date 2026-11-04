@@ -1,0 +1,31 @@
+telegram:
+  token: env
+  skipOldMessages: true
+
+discord:
+  token: env
+  skipOldMessages: true
+
+bridges:
+  - name: NEBPAH-Bridge-Lab
+    direction: both
+
+    topicBridges:
+      - name: Bridge-Lab
+        telegram: 130698
+        discord: '1567394966836351047'
+
+    topicBridgesAutoCreate: false
+
+    telegram:
+      chatId: -1002634606116
+      sendUsernames: true
+      relayJoinMessages: false
+      relayLeaveMessages: false
+
+    discord:
+      channelId: '1567394966836351047'
+      sendUsernames: true
+      relayJoinMessages: false
+      relayLeaveMessages: false
+      useEmbeds: auto
