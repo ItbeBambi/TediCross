@@ -348,9 +348,22 @@ export function setup(
 						})
 					: undefined;
 				const componentContent = extractComponentContent(message.components ?? []);
+				// Discord cleanContent replaces custom emoji markup with :name:.
+				// Recover the original emoji IDs so Telegram can receive the artwork.
+				const customEmojiUrls: string[] = [];
+				let cleanedContent = message.cleanContent ?? "";
+				const rawCustomEmoji = /<(a?):([a-zA-Z0-9_]+):(\d+)>/g;
+				for (const match of message.content.matchAll(rawCustomEmoji)) {
+					const [, animated, emojiName, emojiId] = match;
+					// Static emoji can be sent as photos. Animated emoji need a
+					// separate GIF/video conversion path; keep their text fallback.
+					if (animated) continue;
+					customEmojiUrls.push(`https://cdn.discordapp.com/emojis/${emojiId}.png`);
+					cleanedContent = cleanedContent.replace(`:${emojiName}:`, "");
+				}
 				const messageParts: string[] = [];
 				if (isForward) messageParts.push("<b>Forwarded message</b>");
-				if (message.cleanContent) messageParts.push(md2html(message.cleanContent, settings.telegram));
+				if (cleanedContent.trim()) messageParts.push(md2html(cleanedContent.trim(), settings.telegram));
 				if (componentContent.text.length) {
 					messageParts.push(md2html(componentContent.text.join("\n"), settings.telegram));
 				}
@@ -380,7 +393,7 @@ export function setup(
 					}
 				}
 
-				const galleryImageUrls = [...componentContent.imageUrls, ...staticStickerUrls];
+				const galleryImageUrls = [...componentContent.imageUrls, ...staticStickerUrls, ...customEmojiUrls];
 				for (const embed of message.embeds) {
 					const imageUrl = embed.image?.url ?? embed.thumbnail?.url;
 					if (!imageUrl || galleryImageUrls.includes(imageUrl)) continue;
