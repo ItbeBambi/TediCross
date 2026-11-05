@@ -4,7 +4,6 @@ import yargs from "yargs";
 import path from "path";
 import { Logger } from "./Logger";
 import { MessageMap } from "./MessageMap";
-import { Bridge, BridgeProperties } from "./bridgestuff/Bridge";
 import { BridgeMap } from "./bridgestuff/BridgeMap";
 import { Settings } from "./settings/Settings";
 import jsYaml from "js-yaml";
@@ -102,7 +101,7 @@ const dcBot = new DiscordClient({
 						type: ActivityType.Custom
 					}
 				]
-		  }
+			}
 		: {}
 });
 

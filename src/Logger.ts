@@ -4,7 +4,6 @@ import moment from "moment";
 const dummy = R.always(undefined);
 
 /** Logger utility which works just like the ordinary 'console' but prefixes any message with a timestamp and type of message */
-// eslint-disable-next-line no-console
 export class Logger extends console.Console {
 	private _debugEnabled: boolean;
 	/**

@@ -119,7 +119,7 @@ export class MessageMap {
 				// console.log(toIds);
 				return toIds;
 			}
-		} catch (err) {
+		} catch {
 			// Unknown message ID. Don't do anything
 			return [];
 		}
@@ -138,7 +138,7 @@ export class MessageMap {
 				const key = await this._persistentMap.getCorrespondingReverse(direction, bridge, toId);
 				return key ? key.slice(direction.length + 1).split(" ") : [];
 			}
-		} catch (err) {
+		} catch {
 			// Unknown message ID. Don't do anything
 			return [];
 		}

@@ -15,6 +15,7 @@ import { BridgeMap } from "../bridgestuff/BridgeMap";
 import { Input, Telegraf } from "telegraf";
 import {
 	escapeHTMLSpecialChars,
+	extractCustomEmojiMedia,
 	extractComponentContent,
 	getDiscordDisplayName,
 	ignoreAlreadyDeletedError,
@@ -348,22 +349,10 @@ export function setup(
 						})
 					: undefined;
 				const componentContent = extractComponentContent(message.components ?? []);
-				// Discord cleanContent replaces custom emoji markup with :name:.
-				// Recover the original emoji IDs so Telegram can receive the artwork.
-				const customEmojiUrls: string[] = [];
-				let cleanedContent = message.cleanContent ?? "";
-				const rawCustomEmoji = /<(a?):([a-zA-Z0-9_]+):(\d+)>/g;
-				for (const match of message.content.matchAll(rawCustomEmoji)) {
-					const [, animated, emojiName, emojiId] = match;
-					// Static emoji can be sent as photos. Animated emoji need a
-					// separate GIF/video conversion path; keep their text fallback.
-					if (animated) continue;
-					customEmojiUrls.push(`https://cdn.discordapp.com/emojis/${emojiId}.png`);
-					cleanedContent = cleanedContent.replace(`:${emojiName}:`, "");
-				}
+				const customEmoji = extractCustomEmojiMedia(message.content, message.cleanContent ?? "");
 				const messageParts: string[] = [];
 				if (isForward) messageParts.push("<b>Forwarded message</b>");
-				if (cleanedContent.trim()) messageParts.push(md2html(cleanedContent.trim(), settings.telegram));
+				if (customEmoji.text) messageParts.push(md2html(customEmoji.text, settings.telegram));
 				if (componentContent.text.length) {
 					messageParts.push(md2html(componentContent.text.join("\n"), settings.telegram));
 				}
@@ -381,26 +370,40 @@ export function setup(
 								.join("\n")
 					);
 				}
-				// Static Discord stickers are PNG images. Relay them using the existing
-				// Telegram photo pipeline; keep a text fallback for animated formats.
+				// Relay Discord stickers through the closest Telegram media type.
+				// Lottie stickers keep a text fallback because Telegram cannot import Discord's JSON directly.
 				const staticStickerUrls: string[] = [];
+				const animatedStickerUrls: string[] = [];
+				const documentStickerUrls: string[] = [];
 				for (const sticker of message.stickers.values()) {
 					if (sticker.format === 1 && sticker.url) {
 						staticStickerUrls.push(sticker.url);
+					} else if (sticker.format === 4 && sticker.url) {
+						animatedStickerUrls.push(sticker.url);
+					} else if (sticker.format === 2 && sticker.url) {
+						documentStickerUrls.push(sticker.url);
 					} else {
 						const emoji = sticker.tags ? ` ${escapeHTMLSpecialChars(sticker.tags)}` : "";
 						messageParts.push(`[Sticker: ${escapeHTMLSpecialChars(sticker.name)}${emoji}]`);
 					}
 				}
 
-				const galleryImageUrls = [...componentContent.imageUrls, ...staticStickerUrls, ...customEmojiUrls];
+				const galleryImageUrls = [...componentContent.imageUrls, ...staticStickerUrls, ...customEmoji.photos];
+				const embedVideoUrls: string[] = [];
 				for (const embed of message.embeds) {
 					const imageUrl = embed.image?.url ?? embed.thumbnail?.url;
-					if (!imageUrl || galleryImageUrls.includes(imageUrl)) continue;
-					galleryImageUrls.push(imageUrl);
+					if (imageUrl && !galleryImageUrls.includes(imageUrl)) galleryImageUrls.push(imageUrl);
+					const videoUrl = embed.video?.url ?? embed.video?.proxyURL;
+					if (videoUrl && !embedVideoUrls.includes(videoUrl)) embedVideoUrls.push(videoUrl);
 				}
 				const hasRelayedMedia =
-					message.attachments.size > 0 || Boolean(voiceMessageAttachment) || galleryImageUrls.length > 0;
+					message.attachments.size > 0 ||
+					Boolean(voiceMessageAttachment) ||
+					galleryImageUrls.length > 0 ||
+					embedVideoUrls.length > 0 ||
+					customEmoji.animations.length > 0 ||
+					animatedStickerUrls.length > 0 ||
+					documentStickerUrls.length > 0;
 
 				let messageCaption = "";
 				const streamKey = `${bridge.name}:${bridge.tgThread ?? "general"}`;
@@ -429,7 +432,7 @@ export function setup(
 					voiceMessageAttachment && messageCaption.length > 0 && messageCaption.length <= 1024
 				);
 				const captionWithAttachments =
-					message.attachments.size > 0 &&
+					(message.attachments.size > 0 || embedVideoUrls.length > 0 || documentStickerUrls.length > 0) &&
 					!voiceMessageAttachment &&
 					messageCaption.length > 0 &&
 					messageCaption.length <= 1024;
@@ -507,6 +510,8 @@ export function setup(
 						handleMediaFile(attachment, "document");
 					}
 				}
+				for (const url of embedVideoUrls) videos.push({ type: "video", media: url });
+				for (const url of documentStickerUrls) documents.push({ type: "document", media: url });
 
 				const mediaArray = [];
 				if (videos.length) mediaArray.push([...videos]);
@@ -713,6 +718,27 @@ export function setup(
 							);
 							await sendVoiceCaptionAsText();
 						}
+					}
+				}
+
+				const animationUrls = [...customEmoji.animations, ...animatedStickerUrls];
+				for (const [index, url] of animationUrls.entries()) {
+					try {
+						const attachCaption =
+							!captionSentWithMedia && messageCaption.length > 0 && messageCaption.length <= 1024;
+						const sent = await tgBot.telegram.sendAnimation(bridge.telegram.chatId, url, {
+							...telegramReplyOptions(replyId),
+							...(attachCaption ? { caption: messageCaption, parse_mode: "HTML" as const } : {}),
+							...(bridge.tgThread === 1 ? {} : { message_thread_id: bridge.tgThread })
+						});
+						sentTelegramMessageIds.push(sent.message_id.toString());
+						if (attachCaption) captionSentWithMedia = true;
+					} catch (err) {
+						mediaSendFailed = true;
+						logger.error(
+							`[${bridge.name}] Telegram did not accept animation ${index + 1}:`,
+							(err as Error).toString()
+						);
 					}
 				}
 

@@ -45,7 +45,7 @@ export class PersistentMessageMap {
 		try {
 			// Check if the file exists. This throws if it doesn't
 			fs.accessSync(this._filepath, fs.constants.F_OK);
-		} catch (e) {
+		} catch {
 			// Nope, it doesn't. Create it
 			dbExists = false;
 		}

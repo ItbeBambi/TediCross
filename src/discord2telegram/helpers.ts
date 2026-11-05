@@ -78,6 +78,24 @@ export function replaceExcessiveSpaces(input: string) {
 	return input.replace(regex, "");
 }
 
+/** Extract Discord custom emoji artwork while removing its :name: fallback from cleanContent. */
+export function extractCustomEmojiMedia(content: string, cleanContent: string) {
+	const photos: string[] = [];
+	const animations: string[] = [];
+	let text = cleanContent;
+	for (const match of content.matchAll(/<(a?):([a-zA-Z0-9_]+):(\d+)>/g)) {
+		const [, animated, name, id] = match;
+		const media = `https://cdn.discordapp.com/emojis/${id}.${animated ? "gif" : "png"}`;
+		(animated ? animations : photos).push(media);
+		text = text.replace(`:${name}:`, "");
+	}
+	return {
+		text: text.replace(/[^\S\n]{2,}/g, " ").trim(),
+		photos: [...new Set(photos)],
+		animations: [...new Set(animations)]
+	};
+}
+
 /** Extract readable text and image URLs from Discord's nested message components. */
 export function extractComponentContent(components: any[] = []) {
 	const text: string[] = [];

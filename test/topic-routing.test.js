@@ -3,6 +3,7 @@ const test = require("node:test");
 const { Bridge } = require("../dist/bridgestuff/Bridge");
 const { BridgeMap } = require("../dist/bridgestuff/BridgeMap");
 const { bridgesForTelegramTopic } = require("../dist/bridgestuff/TopicRouting");
+const { extractCustomEmojiMedia } = require("../dist/discord2telegram/helpers");
 
 const telegramTopicId = 130698;
 const discordChannelId = "1567394966836351047";
@@ -43,4 +44,15 @@ test("Discord allows only the configured topic mapping", () => {
 	assert.equal(allowed.length, 1);
 	assert.equal(allowed[0].tgThread, telegramTopicId);
 	assert.deepEqual(map.fromDiscordChannelId("999999999999999999"), []);
+});
+
+test("Discord custom emoji become Telegram media without :name: fallback text", () => {
+	assert.deepEqual(
+		extractCustomEmojiMedia("one <:horsefinger:123> two <a:dance:456>", "one :horsefinger: two :dance:"),
+		{
+			text: "one two",
+			photos: ["https://cdn.discordapp.com/emojis/123.png"],
+			animations: ["https://cdn.discordapp.com/emojis/456.gif"]
+		}
+	);
 });
