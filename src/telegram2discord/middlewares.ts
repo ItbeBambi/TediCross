@@ -636,11 +636,7 @@ async function addPreparedObj(ctx: TediCrossContext, next: () => void) {
 			await ctx.TediCross.dcBot.ready;
 
 			// Get the channel to send to
-			const channel = await fetchDiscordChannel(
-				ctx.TediCross.dcBot,
-				bridge,
-				bridge.tgThread
-			);
+			const channel = await fetchDiscordChannel(ctx.TediCross.dcBot, bridge, bridge.tgThread);
 			// Discord applies the guild upload limit to bot uploads. Guild boost tiers 2 and 3
 			// raise that limit; keep the actual API rejection handler as the final authority.
 			const premiumTier = (channel as any).guild?.premiumTier ?? 0;
